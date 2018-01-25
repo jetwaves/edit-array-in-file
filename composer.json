@@ -1,0 +1,19 @@
+{
+    "name": "jetwaves/edit-array-in-file",
+    "description": "CRUD (Add, modify, list, delete) of elements from arrays in php file.",
+    "type": "sdk",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "jetwaves",
+            "email": "jetwaves@qq.com"
+        }
+    ],
+    "minimum-stability": "stable",
+    "require": {},
+    "autoload": {
+        "psr-4": {
+            "Jetwaves\\EditArrayInFile\\": "src/"
+        }
+    }
+}
