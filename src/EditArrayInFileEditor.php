@@ -28,8 +28,9 @@ class Editor {
     const TYPE_EOB_COMMA = 5;                               //    ],   end of bloc
     const TYPE_EOB_SEMI_COLON = 5;                               //    ],   end of bloc
 
-    const INSERT_TYPE_DATA_ONLY = 0;
-    const INSERT_TYPE_KV_PAIR = 0;
+    const INSERT_TYPE_RAW = 0;
+    const INSERT_TYPE_KV_PAIR = 1;
+    const INSERT_TYPE_DATA_ONLY = 2;
 
 
     function __construct($filename = null)
@@ -41,13 +42,23 @@ class Editor {
         $this->parse();
     }
 
+    /**
+     * @return array
+     */
+    public function getEditArea()
+    {
+        return $this->_editArea;
+    }
+
+
+
     private function parse(){
         $this->_contentArray = file($this->_filleFullName);
     }
 
     public function where($arrayName, $options = [], $type = self::TYPE_VARIABLE)
     {
-        echo '  arrayName = '.$arrayName.PHP_EOL;
+//        echo '  arrayName = '.$arrayName.PHP_EOL;
         $this->_codesBeforeEditArea = [];
         $this->_codesAfterEditArea = [];
         $foundStart = false;
@@ -78,7 +89,7 @@ class Editor {
             $this->_res[] = $parseInfo;
 //            echo print_r($parseInfo, true).PHP_EOL;
         }
-        echo '  ================== '.PHP_EOL;
+//        echo '  ================== '.PHP_EOL;
 //        echo print_r($this->_res, true);
 //        var_dump($this->_res);
         array_pop($this->_codesBeforeEditArea);
@@ -88,15 +99,15 @@ class Editor {
 
     // get the content of the founded array.
     public function get(){
-        echo '_codesBeforeEditArea      '.PHP_EOL;
-        echo print_r($this->_codesBeforeEditArea, true);
-
-        echo '_editArea     '.PHP_EOL;
-        echo print_r($this->_editArea, true);
-
-
-        echo '  _codesAfterEditArea     '.PHP_EOL;
-        echo print_r($this->_codesAfterEditArea, true);
+//        echo '_codesBeforeEditArea      '.PHP_EOL;
+//        echo print_r($this->_codesBeforeEditArea, true);
+//
+//        echo '_editArea     '.PHP_EOL;
+//        echo print_r($this->_editArea, true);
+//
+//
+//        echo '  _codesAfterEditArea     '.PHP_EOL;
+//        echo print_r($this->_codesAfterEditArea, true);
 
 
         return $this->_editArea;
@@ -110,9 +121,10 @@ class Editor {
 
     }
 
-    public function insert($data, $insertType = self::INSERT_TYPE_DATA_ONLY ){
-
-
+    public function insert($data, $insertType = self::INSERT_TYPE_RAW ){
+        $eob = array_pop($this->_editArea);
+        $this->_editArea[] = $data;
+        $this->_editArea[] = $eob;
     }
 
     private function match($line, $keyword, $type, $matchEndOfBloc = null ){
@@ -165,9 +177,17 @@ class Editor {
         return [false, false];
     }
 
-    // write the edited content back to the source file
-    public function flush(){
+    // reconstruct the complete file in the memory
+    public function save(){
+        $this->_contentArray =  array_merge($this->_codesBeforeEditArea, $this->_editArea, $this->_codesAfterEditArea);
+        return $this;
+    }
 
+    // write the edited content back(in memory) to the source file
+    public function flush(){
+        $content = implode('',$this->_contentArray);
+        $saveToFileRes = file_put_contents($this->_filleFullName, $content);
+        return $saveToFileRes;
     }
 
 
@@ -176,6 +196,17 @@ class Editor {
     {
         foreach ((array) $needles as $needle) {
             if ($needle !== '' && mb_strpos($haystack, $needle) !== false) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public static function endsWith($haystack, $needles)
+    {
+        foreach ((array) $needles as $needle) {
+            if (mb_substr($haystack, -mb_strlen($needle)) === (string) $needle) {
                 return true;
             }
         }
