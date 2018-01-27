@@ -93,6 +93,16 @@ return [
     ],
 ];
 ```
+1.3. CRUD->R : Search in target variable for a key :
+```php
+    <?php
+    $val = $editor->where('aliases',[], Editor::TYPE_KV_PAIR)
+                  ->find('App', Editor::FIND_TYPE_KEY_ONLY);
+```
+the result is : 
+```php
+    target key `s val  = Illuminate\Support\Facades\App::class
+```
 
 ###When the target is an array in a variable)
 ```php
@@ -184,8 +194,16 @@ class Kernel extends HttpKernel
 }
 
 ```
-
-
+2.3. CRUD->R : Search in target variable for a key :
+```php
+<?php
+$editor->where('$routeMiddleware',[], Editor::TYPE_VARIABLE)
+       ->find('bindings', Editor::FIND_TYPE_KEY_ONLY);
+```
+the result is : 
+```php
+target key `s val  = \Illuminate\Routing\Middleware\SubstituteBindings::class
+```
 
 
 

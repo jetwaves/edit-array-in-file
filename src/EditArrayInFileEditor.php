@@ -31,6 +31,9 @@ class Editor {
     const INSERT_TYPE_KV_PAIR           = 1;    // insert a kv pair as value
     const INSERT_TYPE_DATA_ONLY         = 2;    // insert a value array (without keys)
 
+    const FIND_TYPE_ALL                 = 0;    // when using find(),  find the keys AND values of the target area
+    const FIND_TYPE_KEY_ONLY            = 1;    //                              keys only
+    const FIND_TYPE_VALUE_ONLY          = 2;    //                              values only
 
     function __construct($filename = null)
     {
@@ -49,12 +52,16 @@ class Editor {
         return $this->_editArea;
     }
 
+    public function getTargetLines()
+    {
+        return array_slice($this->_editArea, 1, count($this->_editArea) - 2, true);
+    }
+
     private function parse(){
         $this->_contentArray = file($this->_filleFullName);
     }
 
-    public function where($arrayName, $options = [], $type = self::TYPE_VARIABLE)
-    {
+    public function where($arrayName, $options = [], $type = self::TYPE_VARIABLE){
         $this->_codesBeforeEditArea = [];
         $this->_codesAfterEditArea = [];
         $foundStart = false;
@@ -75,43 +82,83 @@ class Editor {
                 $this->_codesAfterEditArea[] = $originalLine;
             }
 
-            $parseInfo =
+            /*$parseInfo =
                 'ln         = '.$ln.PHP_EOL.
                 '               line       = '.$line.PHP_EOL.
                 '               pos        = '.strpos($originalLine, "aliases").PHP_EOL.
                 '               foundStart = '.($foundStart?'true':'false').PHP_EOL.
                 '               foundEnd   = '.($foundEnd?'true':'false').PHP_EOL.
                 '               eob        = '.($eob?'true':'false').PHP_EOL.PHP_EOL;
-            $this->_res[] = $parseInfo;
-//            echo '     '.__method__.'() line:'.__line__.'   $parseInfo  = '.print_r($parseInfo, true);
+            $this->_res[] = $parseInfo;*/
         }
-//        echo '     '.__method__.'() line:'.__line__.'   $this->_res  = '.print_r($this->_res, true);
         array_pop($this->_codesBeforeEditArea);
         array_splice($this->_codesAfterEditArea, 0, 1);
-//        echo '     '.__method__.'() line:'.__line__.'   $this->_codesBeforeEditArea  = '.print_r($this->_codesBeforeEditArea, true);
-//        echo '     '.__method__.'() line:'.__line__.'   $this->_editArea             = '.print_r($this->_editArea, true);
-//        echo '     '.__method__.'() line:'.__line__.'   $this->_codesAfterEditArea   = '.print_r($this->_codesAfterEditArea, true);
         return $this;
     }
 
     // get the content of the founded array.
     public function get(){
-//        echo '     '.__method__.'() line:'.__line__.'   $this->_codesBeforeEditArea  = '.print_r($this->_codesBeforeEditArea, true);
-//        echo '     '.__method__.'() line:'.__line__.'   $this->_editArea             = '.print_r($this->_editArea, true);
-//        echo '     '.__method__.'() line:'.__line__.'   $this->_codesAfterEditArea   = '.print_r($this->_codesAfterEditArea, true);
+
         return $this->_editArea;
     }
 
-    public function find(){
+    public function echoParts(){
+        echo '  WARNING: THIS FUNCTION SHOULD ONLY BE USED DURING TEST '.PHP_EOL;
+        echo '     '.__method__.'() line:'.__line__.'   $this->_codesBeforeEditArea  = '.print_r($this->_codesBeforeEditArea, true);
+        echo '     '.__method__.'() line:'.__line__.'   $this->_editArea             = '.print_r($this->_editArea, true);
+        echo '     '.__method__.'() line:'.__line__.'   $this->_codesAfterEditArea   = '.print_r($this->_codesAfterEditArea, true);
+    }
 
+    // if the target array contains a key or value
+    public function find($keyword, $comp = null, $type = self::FIND_TYPE_KEY_ONLY){
+        $items = $this->getTargetLines();
+//        echo '     '.__method__.'() line:'.__line__.'   $items  = '.print_r($items, true).PHP_EOL;
+        foreach ($items as $line){
+            $line = trim(trim($line),',');
+//            echo '     '.__method__.'() line:'.__line__.'   $line  = '.print_r($line, true).PHP_EOL;
+            $arr = explode('=>', $line);
+//            echo '     '.__method__.'() line:'.__line__.'   $arr  = '.print_r($arr, true).PHP_EOL;
+            foreach ($arr as $idx => $item){
+                $arr[$idx] = trim($item);
+            }
+            $key = $arr[0];
+            if(count($arr)>1){
+                $val = $arr[1];
+            } else{
+                $val = $arr[0];
+            }
+            $key = str_replace("'","", $key);
+            $val = str_replace("'","", $val);
+//            echo '     '.__method__.'() line:'.__line__.'   $key  = '.print_r($key, true).PHP_EOL;
+//            echo '     '.__method__.'() line:'.__line__.'   $val  = '.print_r($val, true).PHP_EOL;
+            switch ($type){
+                case self::FIND_TYPE_ALL:
+                    if($key == $keyword || $val == $comp ){
+                        return $val;
+                    }
+                    break;
+
+                case self::FIND_TYPE_KEY_ONLY:
+                    if($key == $keyword){
+                        return $val;
+                    }
+                    break;
+                case self::FIND_TYPE_VALUE_ONLY:
+                    if($val == $keyword){
+                        return $val;
+                    }
+                    break;
+            }
+        }
+        return null;
     }
 
     public function delete(){
-
+        throw new \Exception('FUNCTION ISNOT IMPLIMENTED');
     }
 
     public function insert($data, $insertType = self::INSERT_TYPE_RAW ){
-        $items = array_slice($this->_editArea, 1, count($this->_editArea) - 2, true);
+        $items = $this->getTargetLines();
         echo '     '.__method__.'() line:'.__line__.'   $items  = '.print_r($items, true);
         // delete "EOL" and ",",  then add ',EOL' for every line  -> then add the new line
         foreach($items as $key => $val){
