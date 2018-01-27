@@ -20,8 +20,12 @@ composer require jetwaves/edit-array-in-file
 ```
 
 ## API:
-// TODO:
-
+* $editor->where($arrayName, $options = [], $type = self::TYPE_VARIABLE)        : Find the code snippet(an array)
+* $editor->find($keyword, $comp = null, $type = self::FIND_TYPE_KEY_ONLY)       : Find a line in the array above
+* $editor->insert($data, $insertType = self::INSERT_TYPE_RAW )                  : Insert a new line into the array
+* $editor->delete()                                                             : Delete the line found by find()
+* $editor->save()                                                               : Reconstruct the file lines in memory
+* $editor->flush()                                                              : Write the edited file content into file
 
 ## Example:
 ### include the lib:
@@ -103,13 +107,19 @@ the result is :
 ```php
     target key `s val  = Illuminate\Support\Facades\App::class
 ```
-
+1.4. CRUD->D : delete one line in target Key-Value pair
+```php
+<?php
+$editor->where('aliases',[], Editor::TYPE_KV_PAIR)
+       ->find('JWTAuth', Editor::FIND_TYPE_ALL);
+$editor->delete()->save()->flush();
+```
+It will delete the line 'JWTAuth' from file Kernel.php
 ###When the target is an array in a variable)
 ```php
 <?php
     $editor = new Editor('testSource/Kernel.php');
 ```
-
 2.1.CRUD->R : Find target variable in a php source code file:
 ```php
 <?php
@@ -204,8 +214,13 @@ the result is :
 ```php
 target key `s val  = \Illuminate\Routing\Middleware\SubstituteBindings::class
 ```
-
-
-
+2.4. CRUD->D : delete one line in target variable
+```php
+<?php
+    $editor->where('$routeMiddleware',[], Editor::TYPE_VARIABLE)
+            ->find('auth.basic', Editor::FIND_TYPE_ALL)
+            ->delete()->save()->flush();
+```
+It will delete the line 'auth.basic' from file Kernel.php
 
   

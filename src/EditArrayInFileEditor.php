@@ -15,6 +15,7 @@ class Editor {
     private $_codesBeforeEditArea = [];
     private $_codesAfterEditArea = [];
     private $_editArea = [];
+    private $_targetLineNumber = null;          // When using find(), It is the index number of the target line.
     private $_res = [];
 
     const TYPE_RAW                      = 0;    //  simple and headless str_pos
@@ -111,13 +112,11 @@ class Editor {
 
     // if the target array contains a key or value
     public function find($keyword, $comp = null, $type = self::FIND_TYPE_KEY_ONLY){
+        $this->_targetLineNumber = null;
         $items = $this->getTargetLines();
-//        echo '     '.__method__.'() line:'.__line__.'   $items  = '.print_r($items, true).PHP_EOL;
-        foreach ($items as $line){
+        foreach ($items as $lineNumber => $line){
             $line = trim(trim($line),',');
-//            echo '     '.__method__.'() line:'.__line__.'   $line  = '.print_r($line, true).PHP_EOL;
             $arr = explode('=>', $line);
-//            echo '     '.__method__.'() line:'.__line__.'   $arr  = '.print_r($arr, true).PHP_EOL;
             foreach ($arr as $idx => $item){
                 $arr[$idx] = trim($item);
             }
@@ -131,20 +130,24 @@ class Editor {
             $val = str_replace("'","", $val);
 //            echo '     '.__method__.'() line:'.__line__.'   $key  = '.print_r($key, true).PHP_EOL;
 //            echo '     '.__method__.'() line:'.__line__.'   $val  = '.print_r($val, true).PHP_EOL;
+            $ret = null;
             switch ($type){
                 case self::FIND_TYPE_ALL:
                     if($key == $keyword || $val == $comp ){
+                        $this->_targetLineNumber = $lineNumber;
                         return $val;
                     }
                     break;
 
                 case self::FIND_TYPE_KEY_ONLY:
                     if($key == $keyword){
+                        $this->_targetLineNumber = $lineNumber;
                         return $val;
                     }
                     break;
                 case self::FIND_TYPE_VALUE_ONLY:
                     if($val == $keyword){
+                        $this->_targetLineNumber = $lineNumber;
                         return $val;
                     }
                     break;
@@ -154,12 +157,20 @@ class Editor {
     }
 
     public function delete(){
-        throw new \Exception('FUNCTION ISNOT IMPLIMENTED');
+        if($this->_targetLineNumber){
+            $arr = [];
+            foreach ($this->_editArea as $idx => $line ) {
+                if($idx != $this->_targetLineNumber){
+                    $arr[] = $line;
+                }
+            }
+            $this->_editArea = $arr;
+        }
+        return $this;
     }
 
     public function insert($data, $insertType = self::INSERT_TYPE_RAW ){
         $items = $this->getTargetLines();
-        echo '     '.__method__.'() line:'.__line__.'   $items  = '.print_r($items, true);
         // delete "EOL" and ",",  then add ',EOL' for every line  -> then add the new line
         foreach($items as $key => $val){
             if(trim($val) == '') continue;
@@ -170,7 +181,6 @@ class Editor {
     }
 
     private function match($line, $keyword, $type, $matchEndOfBloc = null ){
-        $endOfBlock = '';
         switch($type){
             case self::TYPE_VARIABLE :          // format like :    protected $middleware = [  ];    protected $routeMiddleware = [ ];
                 $endOfBlock = '];';
