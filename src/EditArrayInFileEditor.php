@@ -8,7 +8,6 @@
 
 namespace Jetwaves\EditArrayInFile;
 
-
 class Editor {
     private $_filleFullName = '';
     private $_contentArray = [];
@@ -18,19 +17,19 @@ class Editor {
     private $_editArea = [];
     private $_res = [];
 
-    const TYPE_RAW = 0;                                                 //  simple and headless str_pos
-    const TYPE_VARIABLE = 1;                                        //  a variable of array.
-    const TYPE_ARRAY_IN_VARIABLE_VALUE = 2;     //  a value array in a variable
-                            //          eg.   $variable_lv1 = [  'key1_lv1' => [ 'targetKey' => 'targetValueToEdit', 'key2_lv2' => '...val_lv2' ], 'key2_lv1' => '....val2_lv2'  ] ;
-    const TYPE_KV_PAIR = 3;                                         // simple kv pair
-    const TYPE_ARRAY_IN_KV_PAIR = 4;                    // multi_level_kv_pair
-                            //         eg.   'some_key' =>   [  'key1_lv1' => [ 'targetKey' => 'targetValueToEdit', 'key2_lv2' => '...val_lv2' ], 'key2_lv1' => '....val2_lv2'  ] ;
-    const TYPE_EOB_COMMA = 5;                               //    ],   end of bloc
-    const TYPE_EOB_SEMI_COLON = 5;                               //    ],   end of bloc
+    const TYPE_RAW                      = 0;    //  simple and headless str_pos
+    const TYPE_VARIABLE                 = 1;    //  a variable of array.
+    const TYPE_ARRAY_IN_VARIABLE_VALUE  = 2;    //  a value array in a variable
+        //          eg.   $variable_lv1 = [  'key1_lv1' => [ 'targetKey' => 'targetValueToEdit', 'key2_lv2' => '...val_lv2' ], 'key2_lv1' => '....val2_lv2'  ] ;
+    const TYPE_KV_PAIR                  = 3;    // simple kv pair
+    const TYPE_ARRAY_IN_KV_PAIR         = 4;    // multi_level_kv_pair
+        //         eg.   'some_key' =>   [  'key1_lv1' => [ 'targetKey' => 'targetValueToEdit', 'key2_lv2' => '...val_lv2' ], 'key2_lv1' => '....val2_lv2'  ] ;
+    const TYPE_EOB_COMMA                = 5;    //    ],   end of bloc
+    const TYPE_EOB_SEMI_COLON           = 6;    //    ];   end of bloc
 
-    const INSERT_TYPE_RAW = 0;
-    const INSERT_TYPE_KV_PAIR = 1;
-    const INSERT_TYPE_DATA_ONLY = 2;
+    const INSERT_TYPE_RAW               = 0;    // simply insert one line
+    const INSERT_TYPE_KV_PAIR           = 1;    // insert a kv pair as value
+    const INSERT_TYPE_DATA_ONLY         = 2;    // insert a value array (without keys)
 
 
     function __construct($filename = null)
@@ -50,23 +49,20 @@ class Editor {
         return $this->_editArea;
     }
 
-
-
     private function parse(){
         $this->_contentArray = file($this->_filleFullName);
     }
 
     public function where($arrayName, $options = [], $type = self::TYPE_VARIABLE)
     {
-//        echo '  arrayName = '.$arrayName.PHP_EOL;
         $this->_codesBeforeEditArea = [];
         $this->_codesAfterEditArea = [];
         $foundStart = false;
         $foundEnd = false;
-        $eob = false;                                 // end of target code bloc   (    ];   or  ],  )
+        $eob = false;                             // end of target code bloc   (    ];   or  ],  )
         foreach ($this->_contentArray as $ln => $originalLine ) {
             $line = trim($originalLine);
-//            if($line == '') continue;           // ignore empty lines;
+//            if($line == '') continue;           // ignore empty lines(during test);
             if($foundStart == false){
                 list($foundStart, $eob) = $this->match($line, $arrayName, $type);
                 $this->_codesBeforeEditArea[] = $originalLine;
@@ -87,29 +83,22 @@ class Editor {
                 '               foundEnd   = '.($foundEnd?'true':'false').PHP_EOL.
                 '               eob        = '.($eob?'true':'false').PHP_EOL.PHP_EOL;
             $this->_res[] = $parseInfo;
-//            echo print_r($parseInfo, true).PHP_EOL;
+//            echo '     '.__method__.'() line:'.__line__.'   $parseInfo  = '.print_r($parseInfo, true);
         }
-//        echo '  ================== '.PHP_EOL;
-//        echo print_r($this->_res, true);
-//        var_dump($this->_res);
+//        echo '     '.__method__.'() line:'.__line__.'   $this->_res  = '.print_r($this->_res, true);
         array_pop($this->_codesBeforeEditArea);
         array_splice($this->_codesAfterEditArea, 0, 1);
+//        echo '     '.__method__.'() line:'.__line__.'   $this->_codesBeforeEditArea  = '.print_r($this->_codesBeforeEditArea, true);
+//        echo '     '.__method__.'() line:'.__line__.'   $this->_editArea             = '.print_r($this->_editArea, true);
+//        echo '     '.__method__.'() line:'.__line__.'   $this->_codesAfterEditArea   = '.print_r($this->_codesAfterEditArea, true);
         return $this;
     }
 
     // get the content of the founded array.
     public function get(){
-//        echo '_codesBeforeEditArea      '.PHP_EOL;
-//        echo print_r($this->_codesBeforeEditArea, true);
-//
-//        echo '_editArea     '.PHP_EOL;
-//        echo print_r($this->_editArea, true);
-//
-//
-//        echo '  _codesAfterEditArea     '.PHP_EOL;
-//        echo print_r($this->_codesAfterEditArea, true);
-
-
+//        echo '     '.__method__.'() line:'.__line__.'   $this->_codesBeforeEditArea  = '.print_r($this->_codesBeforeEditArea, true);
+//        echo '     '.__method__.'() line:'.__line__.'   $this->_editArea             = '.print_r($this->_editArea, true);
+//        echo '     '.__method__.'() line:'.__line__.'   $this->_codesAfterEditArea   = '.print_r($this->_codesAfterEditArea, true);
         return $this->_editArea;
     }
 
@@ -122,17 +111,21 @@ class Editor {
     }
 
     public function insert($data, $insertType = self::INSERT_TYPE_RAW ){
-        $eob = array_pop($this->_editArea);
-        $this->_editArea[] = $data;
-        $this->_editArea[] = $eob;
+        $items = array_slice($this->_editArea, 1, count($this->_editArea) - 2, true);
+        echo '     '.__method__.'() line:'.__line__.'   $items  = '.print_r($items, true);
+        // delete "EOL" and ",",  then add ',EOL' for every line  -> then add the new line
+        foreach($items as $key => $val){
+            if(trim($val) == '') continue;
+            $items[$key] = '        '.trim(trim($val), ',').','.PHP_EOL;
+        }
+        $items[] = '        '.$data;
+        $this->_editArea = array_merge([$this->_editArea[0]] , $items,  array_slice($this->_editArea, -1) );
     }
 
     private function match($line, $keyword, $type, $matchEndOfBloc = null ){
         $endOfBlock = '';
         switch($type){
-            case self::TYPE_VARIABLE :
-                //  protected $middleware = [  ];
-                //  protected $routeMiddleware = [ ];
+            case self::TYPE_VARIABLE :          // format like :    protected $middleware = [  ];    protected $routeMiddleware = [ ];
                 $endOfBlock = '];';
                 if(!$matchEndOfBloc){
                     $keyword = ' '.$keyword." = [";
@@ -146,9 +139,7 @@ class Editor {
                     }
                 }
                 break;
-            case self::TYPE_KV_PAIR:
-                // 'providers' => [  ],
-
+            case self::TYPE_KV_PAIR:            // format  like   'providers' => [  ],
                 $endOfBlock = '],';
                 if(!$matchEndOfBloc){
                     $keyword = "'".$keyword."' => [";
@@ -189,6 +180,9 @@ class Editor {
         $saveToFileRes = file_put_contents($this->_filleFullName, $content);
         return $saveToFileRes;
     }
+
+
+
 
 
 
