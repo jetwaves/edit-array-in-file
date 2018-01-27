@@ -34,12 +34,14 @@ or
 <?php
     require('EditArrayInFileEditor.php');
 ```
-
-###When the target is an array in the value of a Key-Value pair)
-1.1.CRUD->R : Find target key in a php source code file:  
+### When the target is an array in the value of a Key-Value pair)
 ```php
 <?php
     $editor = new Editor('testSource/app.php');
+```
+1.1.CRUD->R : Find target key in a php source code file:  
+```php
+<?php
     $targetArray = editor->where('aliases',[], Editor::TYPE_KV_PAIR)->get();
     echo '     '.method.'() line:'.line.'   targetArray  = '.print_r(targetArray, true);
 ```
@@ -61,6 +63,7 @@ the result is:
 
 )
 ```
+
 1.2.CRUD->C : Insert into target key's value in a php source code file:   
 ```php
 <?php
@@ -96,6 +99,7 @@ return [
 <?php
     $editor = new Editor('testSource/Kernel.php');
 ```
+
 2.1.CRUD->R : Find target variable in a php source code file:
 ```php
 <?php
@@ -126,6 +130,7 @@ the result is:
 
 )
 ```
+
 2.2.CRUD->C : Insert into target key's value in a php source code file:   
 ```php
 <?php
