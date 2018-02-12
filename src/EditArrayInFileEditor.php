@@ -18,7 +18,7 @@ class Editor {
     private $_targetLineNumber = null;          // When using find(), It is the index number of the target line.
     private $_res = [];
 
-    const TYPE_RAW                      = 0;    //  simple and headless str_pos
+    const TYPE_RAW                      = 0;    //  simple and headless match and edit,(insert, modify, delete)
     const TYPE_VARIABLE                 = 1;    //  a variable of array.
     const TYPE_ARRAY_IN_VARIABLE_VALUE  = 2;    //  a value array in a variable
         //          eg.   $variable_lv1 = [  'key1_lv1' => [ 'targetKey' => 'targetValueToEdit', 'key2_lv2' => '...val_lv2' ], 'key2_lv1' => '....val2_lv2'  ] ;
@@ -31,6 +31,8 @@ class Editor {
     const INSERT_TYPE_RAW               = 0;    // simply insert one line
     const INSERT_TYPE_KV_PAIR           = 1;    // insert a kv pair as value
     const INSERT_TYPE_DATA_ONLY         = 2;    // insert a value array (without keys)
+    const INSERT_TYPE_BEFORE            = 3;    // insert before the anchor line
+    const INSERT_TYPE_AFTER             = 4;    // insert after  the anchor line
 
     const FIND_TYPE_ALL                 = 0;    // when using find(),  find the keys AND values of the target area
     const FIND_TYPE_KEY_ONLY            = 1;    //                              keys only

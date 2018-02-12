@@ -30,6 +30,9 @@ $editor = new Editor('testSource/app.php');
 //        $editor->where('aliases',[], Editor::TYPE_KV_PAIR)
 //               ->find('JWTAuth', Editor::FIND_TYPE_ALL);
 //        $editor->delete()->save()->flush();
+// 1.5. CRUD->C : add one line after / before the anchor line
+
+
 
 //###When the target is an array in a variable)
 //$editor = new Editor('testSource/Kernel.php');
