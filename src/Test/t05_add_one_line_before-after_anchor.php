@@ -7,13 +7,7 @@ use Jetwaves\EditArrayInFile\Editor as Editor;
 
 $editor = new Editor('../testSource/app.php');
 
-
-//// 1.4. CRUD->D : delete one line in target Key-Value pair
-//        $editor->where('aliases',[], Editor::TYPE_KV_PAIR)
-//               ->find('JWTAuth', Editor::FIND_TYPE_ALL);
-//        $editor->delete()->save()->flush();
-
-// 1.5. CRUD->C : add one line after / before the anchor line
+// add one line before or after the anchor
 
 echo ' ============================================================================================='.PHP_EOL;
 echo ' ==============================    Test case 1 + 2 : Locate by array ========================='.PHP_EOL;
