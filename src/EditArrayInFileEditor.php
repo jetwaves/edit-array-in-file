@@ -67,6 +67,7 @@ class Editor {
     public function where($arrayName, $options = [], $type = self::TYPE_VARIABLE){
         $this->_codesBeforeEditArea = [];
         $this->_codesAfterEditArea = [];
+        $this->_editArea = [];
         $foundStart = false;
         $foundEnd = false;
         $eob = false;                             // end of target code bloc   (    ];   or  ],  )
@@ -106,10 +107,15 @@ class Editor {
     }
 
     public function echoParts(){
-        echo '  WARNING: THIS FUNCTION SHOULD ONLY BE USED DURING TEST '.PHP_EOL;
+        echo '  WARNING: THIS FUNCTION [ echoParts() ] SHOULD ONLY BE USED DURING TEST '.PHP_EOL;
         echo '     '.__method__.'() line:'.__line__.'   $this->_codesBeforeEditArea  = '.print_r($this->_codesBeforeEditArea, true);
         echo '     '.__method__.'() line:'.__line__.'   $this->_editArea             = '.print_r($this->_editArea, true);
         echo '     '.__method__.'() line:'.__line__.'   $this->_codesAfterEditArea   = '.print_r($this->_codesAfterEditArea, true);
+    }
+
+    public function echoTargetArea(){
+        echo '  WARNING: THIS FUNCTION [ echoTargetArea() ] SHOULD ONLY BE USED DURING TEST '.PHP_EOL;
+        echo '     '.__method__.'() line:'.__line__.'   $this->_editArea             = '.print_r($this->_editArea, true);
     }
 
     // if the target array contains a key or value
@@ -173,6 +179,7 @@ class Editor {
 
     public function insert($data, $insertType = self::INSERT_TYPE_RAW ){
         $items = $this->getTargetLines();
+        echo ''.__FILE__.'->'.__method__.'() line:'.__line__.'   $items  = '.print_r($items, true);
         // delete "EOL" and ",",  then add ',EOL' for every line  -> then add the new line
         foreach($items as $key => $val){
             if(trim($val) == '') continue;
