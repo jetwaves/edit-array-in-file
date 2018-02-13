@@ -18,6 +18,7 @@ class Editor {
     private $_targetLineNumber = null;          // When using find(), It is the index number of the target line.
     private $_res = [];
 
+
     const TYPE_RAW                      = 0;    //  simple and headless match and edit,(insert, modify, delete)
     const TYPE_VARIABLE                 = 1;    //  a variable of array.
     const TYPE_ARRAY_IN_VARIABLE_VALUE  = 2;    //  a value array in a variable
@@ -33,6 +34,7 @@ class Editor {
     const INSERT_TYPE_DATA_ONLY         = 2;    // insert a value array (without keys)
     const INSERT_TYPE_BEFORE            = 3;    // insert before the anchor line
     const INSERT_TYPE_AFTER             = 4;    // insert after  the anchor line
+    const INSERT_TYPE_ARRAY             = 5;    // insert on line into the array
 
     const FIND_TYPE_ALL                 = 0;    // when using find(),  find the keys AND values of the target area
     const FIND_TYPE_KEY_ONLY            = 1;    //                              keys only
@@ -44,6 +46,7 @@ class Editor {
             throw new \Exception('Must provide a valid file name');
         }
         $this->_filleFullName = $filename;
+        $this->_targetLineNumber = 0;
         $this->parse();
     }
 
@@ -64,7 +67,7 @@ class Editor {
         $this->_contentArray = file($this->_filleFullName);
     }
 
-    public function where($arrayName, $options = [], $type = self::TYPE_VARIABLE){
+    public function where($targetName, $options = [], $type = self::TYPE_VARIABLE){
         $this->_codesBeforeEditArea = [];
         $this->_codesAfterEditArea = [];
         $this->_editArea = [];
@@ -75,7 +78,7 @@ class Editor {
             $line = trim($originalLine);
 //            if($line == '') continue;           // ignore empty lines(during test);
             if($foundStart == false){
-                list($foundStart, $eob) = $this->match($line, $arrayName, $type);
+                list($foundStart, $eob) = $this->match($line, $targetName, $type);
                 $this->_codesBeforeEditArea[] = $originalLine;
             }
             if($foundStart && $foundEnd == false){
@@ -86,14 +89,14 @@ class Editor {
                 $this->_codesAfterEditArea[] = $originalLine;
             }
 
-            /*$parseInfo =
+            $parseInfo =
                 'ln         = '.$ln.PHP_EOL.
                 '               line       = '.$line.PHP_EOL.
                 '               pos        = '.strpos($originalLine, "aliases").PHP_EOL.
                 '               foundStart = '.($foundStart?'true':'false').PHP_EOL.
                 '               foundEnd   = '.($foundEnd?'true':'false').PHP_EOL.
                 '               eob        = '.($eob?'true':'false').PHP_EOL.PHP_EOL;
-            $this->_res[] = $parseInfo;*/
+            $this->_res[] = $parseInfo;
         }
         array_pop($this->_codesBeforeEditArea);
         array_splice($this->_codesAfterEditArea, 0, 1);
@@ -116,6 +119,15 @@ class Editor {
     public function echoTargetArea(){
         echo '  WARNING: THIS FUNCTION [ echoTargetArea() ] SHOULD ONLY BE USED DURING TEST '.PHP_EOL;
         echo '     '.__method__.'() line:'.__line__.'   $this->_editArea             = '.print_r($this->_editArea, true);
+    }
+
+    /**
+     * @return array
+     */
+    public function getParseRes()
+    {
+        echo '  WARNING: THIS FUNCTION [ echoTargetArea() ] SHOULD ONLY BE USED DURING TEST '.PHP_EOL;
+        return $this->_res;
     }
 
     // if the target array contains a key or value
@@ -178,19 +190,61 @@ class Editor {
     }
 
     public function insert($data, $insertType = self::INSERT_TYPE_RAW ){
-        $items = $this->getTargetLines();
-        echo ''.__FILE__.'->'.__method__.'() line:'.__line__.'   $items  = '.print_r($items, true);
-        // delete "EOL" and ",",  then add ',EOL' for every line  -> then add the new line
-        foreach($items as $key => $val){
-            if(trim($val) == '') continue;
-            $items[$key] = '        '.trim(trim($val), ',').','.PHP_EOL;
+        switch ($insertType){
+            case self::INSERT_TYPE_RAW:
+            case self::INSERT_TYPE_BEFORE :
+                    $arr = [];
+                    foreach ($this->_editArea as $idx => $line ) {
+                        if($idx != $this->_targetLineNumber){
+                            $arr[] = $line;
+                        } else {
+                            $arr[] = $data;
+                            $arr[] = $line;
+                        }
+                    }
+                    $this->_editArea = $arr;
+                break;
+            case self::INSERT_TYPE_AFTER :
+                    $arr = [];
+                    foreach ($this->_editArea as $idx => $line ) {
+                        if($idx != $this->_targetLineNumber){
+                            $arr[] = $line;
+                        } else {
+                            $arr[] = $line;
+                            $arr[] = $data;
+                        }
+                    }
+                    $this->_editArea = $arr;
+                break;
+            case self::INSERT_TYPE_ARRAY :
+                $items = $this->getTargetLines();
+                echo ''.__FILE__.'->'.__method__.'() line:'.__line__.'   $items  = '.print_r($items, true);
+                // delete "EOL" and ",",  then add ',EOL' for every line  -> then add the new line
+                foreach($items as $key => $val){
+                    if(trim($val) == '') continue;
+                    $items[$key] = '        '.trim(trim($val), ',').','.PHP_EOL;
+                }
+                $items[] = '        '.$data;
+                $this->_editArea = array_merge([$this->_editArea[0]] , $items,  array_slice($this->_editArea, -1) );
+
+                break;
         }
-        $items[] = '        '.$data;
-        $this->_editArea = array_merge([$this->_editArea[0]] , $items,  array_slice($this->_editArea, -1) );
+
     }
 
     private function match($line, $keyword, $type, $matchEndOfBloc = null ){
         switch($type){
+            case self::TYPE_RAW:
+                $endOfBlock = '';
+                if(!$matchEndOfBloc){
+                    $pos = self::contains($line, $keyword);
+                    if($pos){
+                        return [true, $endOfBlock];
+                    }
+                } else {
+                    return [true, true];        //
+                }
+                break;
             case self::TYPE_VARIABLE :          // format like :    protected $middleware = [  ];    protected $routeMiddleware = [ ];
                 $endOfBlock = '];';
                 if(!$matchEndOfBloc){
