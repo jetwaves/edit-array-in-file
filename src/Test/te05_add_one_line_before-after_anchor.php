@@ -18,13 +18,14 @@ echo ' =========================================================================
 
         echo ''.__FILE__.'->'.__method__.'() line:'.__line__.'   Target Area before Insertion '.PHP_EOL;
         $editor->echoTargetArea();
-        $editor->insert('so what`s the problem, let`s do it quick', $editor::INSERT_TYPE_AFTER);
+        $editor->insert('so what`s the problem, let`s do it quick'.PHP_EOL, $editor::INSERT_TYPE_AFTER);
 
         $editor->find('guest', Editor::FIND_TYPE_ALL);
-        $editor->insert('just a little bit, be my little bit ...', $editor::INSERT_TYPE_BEFORE);
+        $editor->insert('just a little bit, be my little bit ...'.PHP_EOL, $editor::INSERT_TYPE_BEFORE);
 
         echo ''.__FILE__.'->'.__method__.'() line:'.__line__.'   Target Area after  Insertion '.PHP_EOL;
         $editor->echoTargetArea();
+        $editor->save()->flush();
 
 $return = PHP_EOL.PHP_EOL.' ====== TEST Result: should return =========='.PHP_EOL.
 '  WARNING: THIS FUNCTION [ echoTargetArea() ] SHOULD ONLY BE USED DURING TEST 
@@ -62,7 +63,7 @@ echo ' ==============================    Test case 3   Locate by Raw compare  ==
 echo ' ============================================================================================='.PHP_EOL;
 
     $editor2 = new Editor('../testSource/Kernel.php');
-    $editor2->where('auth.basic', [], Editor::TYPE_RAW);
+    $editor2->where('Illuminate\Session\Middleware\StartSession', [], Editor::TYPE_RAW);
 //    echo ''.__FILE__.'->'.__method__.'() line:'.__line__.'   $editor->get()  = '.print_r($editor->get(), true);
     
 //    echo ''.__FILE__.'->'.__method__.'() line:'.__line__.'   $editor2->getParseRes()  = '.print_r($editor2->getParseRes(), true);
@@ -81,16 +82,16 @@ echo ' =========================================================================
 
 
 $return2 = PHP_EOL.PHP_EOL.' ===== TEST Result: should return ======'.PHP_EOL.
-'/home/jetwaves/dev/__github/edit-array-in-file/src/Test/te05_add_one_line_before-after_anchor.php->() line:73   $editor2->getEditArea()  BEFORE  = Array
+'/home/jetwaves/dev/__github/edit-array-in-file/src/Test/te05_add_one_line_before-after_anchor.php->() line:74   $editor2->getEditArea()  BEFORE  = Array
 (
-    [0] =>         \'auth.basic\' => \Illuminate\Auth\Middleware\AuthenticateWithBasicAuth::class,
+    [0] =>             \Illuminate\Session\Middleware\StartSession::class,
 
 )
-/home/jetwaves/dev/__github/edit-array-in-file/src/Test/te05_add_one_line_before-after_anchor.php->() line:77   $editor2->getEditArea()  AFTER   = Array
+/home/jetwaves/dev/__github/edit-array-in-file/src/Test/te05_add_one_line_before-after_anchor.php->() line:78   $editor2->getEditArea()  AFTER   = Array
 (
     [0] => TOO BIG, TOO SMALL ..
 
-    [1] =>         \'auth.basic\' => \Illuminate\Auth\Middleware\AuthenticateWithBasicAuth::class,
+    [1] =>             \Illuminate\Session\Middleware\StartSession::class,
 
     [2] => too gros, too klein ..
 

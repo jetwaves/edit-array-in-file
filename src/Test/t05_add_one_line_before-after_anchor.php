@@ -19,13 +19,14 @@ echo ' =========================================================================
         echo ''.__FILE__.'->'.__method__.'() line:'.__line__.'   Target Area before Insertion '.PHP_EOL;
         $editor->echoTargetArea();
 //        $editor->insert('just a little bit, be my little bit ...', $editor::INSERT_TYPE_BEFORE);
-        $editor->insert('so what`s the problem, let`s do it quick', $editor::INSERT_TYPE_AFTER);
+        $editor->insert('so what`s the problem, let`s do it quick'.PHP_EOL, $editor::INSERT_TYPE_AFTER);
 
         $editor->find('JWTAuth', Editor::FIND_TYPE_ALL);
-        $editor->insert('just a little bit, be my little bit ...', $editor::INSERT_TYPE_BEFORE);
+        $editor->insert('just a little bit, be my little bit ...'.PHP_EOL, $editor::INSERT_TYPE_BEFORE);
 
         echo ''.__FILE__.'->'.__method__.'() line:'.__line__.'   Target Area after  Insertion '.PHP_EOL;
         $editor->echoTargetArea();
+        $editor->save()->flush();
 
 $return = PHP_EOL.PHP_EOL.' ====== TEST Result: should return =========='.PHP_EOL.
     '  WARNING: THIS FUNCTION [ echoTargetArea() ] SHOULD ONLY BE USED DURING TEST 
@@ -58,10 +59,11 @@ echo ' =========================================================================
     
 //    echo ''.__FILE__.'->'.__method__.'() line:'.__line__.'   $editor2->getParseRes()  = '.print_r($editor2->getParseRes(), true);
     echo ''.__FILE__.'->'.__method__.'() line:'.__line__.'   $editor2->getEditArea()  BEFORE  = '.print_r($editor2->getEditArea(), true);
-    $editor2->insert('too gros, too klein ..', Editor::INSERT_TYPE_AFTER);
-$editor2->insert('TOO BIG, TOO SMALL ..', Editor::INSERT_TYPE_BEFORE);
+    $editor2->insert('too gros, too klein ..'.PHP_EOL, Editor::INSERT_TYPE_AFTER);
+    $editor2->insert('TOO BIG, TOO SMALL ..'.PHP_EOL, Editor::INSERT_TYPE_BEFORE);
     echo ''.__FILE__.'->'.__method__.'() line:'.__line__.'   $editor2->getEditArea()  AFTER   = '.print_r($editor2->getEditArea(), true);
 
+    $editor2->save()->flush();
 
 
 $return2 = PHP_EOL.PHP_EOL.' ===== TEST Result: should return ======'.PHP_EOL.
