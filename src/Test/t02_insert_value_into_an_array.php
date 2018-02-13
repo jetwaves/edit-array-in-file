@@ -16,7 +16,7 @@ echo ''.__FILE__.'->'.__method__.'() line:'.__line__.'   1.2. CRUD->C : Insert i
 $editor->where('aliases',[], Editor::TYPE_KV_PAIR);
 echo ''.__FILE__.'->'.__method__.'() line:'.__line__.'   ===== Before inserting value into array Aliases '.PHP_EOL;
 $editor->echoParts();
-$editor->insert("'JWTAuth007' => Tymon\\JWTAuth\\Facades\\JWTAuth008::class".PHP_EOL);
+$editor->insert("'JWTAuth007' => Tymon\\JWTAuth\\Facades\\JWTAuth008::class".PHP_EOL, Editor::INSERT_TYPE_ARRAY);
 $editor->save();
 echo ''.__FILE__.'->'.__method__.'() line:'.__line__.'   ===== After inserting value into array Aliases '.PHP_EOL;
 $editor->echoParts();
