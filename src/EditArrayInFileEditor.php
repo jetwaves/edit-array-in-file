@@ -22,10 +22,10 @@ class Editor {
     const TYPE_RAW                      = 0;    //  simple and headless match and edit,(insert, modify, delete)
     const TYPE_VARIABLE                 = 1;    //  a variable of array.
     const TYPE_ARRAY_IN_VARIABLE_VALUE  = 2;    //  a value array in a variable
-        //          eg.   $variable_lv1 = [  'key1_lv1' => [ 'targetKey' => 'targetValueToEdit', 'key2_lv2' => '...val_lv2' ], 'key2_lv1' => '....val2_lv2'  ] ;
+    //          eg.   $variable_lv1 = [  'key1_lv1' => [ 'targetKey' => 'targetValueToEdit', 'key2_lv2' => '...val_lv2' ], 'key2_lv1' => '....val2_lv2'  ] ;
     const TYPE_KV_PAIR                  = 3;    // simple kv pair
     const TYPE_ARRAY_IN_KV_PAIR         = 4;    // multi_level_kv_pair
-        //         eg.   'some_key' =>   [  'key1_lv1' => [ 'targetKey' => 'targetValueToEdit', 'key2_lv2' => '...val_lv2' ], 'key2_lv1' => '....val2_lv2'  ] ;
+    //         eg.   'some_key' =>   [  'key1_lv1' => [ 'targetKey' => 'targetValueToEdit', 'key2_lv2' => '...val_lv2' ], 'key2_lv1' => '....val2_lv2'  ] ;
     const TYPE_EOB_COMMA                = 5;    //    ],   end of bloc
     const TYPE_EOB_SEMI_COLON           = 6;    //    ];   end of bloc
 
@@ -193,36 +193,40 @@ class Editor {
         switch ($insertType){
             case self::INSERT_TYPE_RAW:
             case self::INSERT_TYPE_BEFORE :
-                    $arr = [];
-                    foreach ($this->_editArea as $idx => $line ) {
-                        if($idx != $this->_targetLineNumber){
-                            $arr[] = $line;
-                        } else {
-                            $arr[] = $data;
-                            $arr[] = $line;
-                        }
+                $arr = [];
+                foreach ($this->_editArea as $idx => $line ) {
+                    if($idx != $this->_targetLineNumber){
+                        $arr[] = $line;
+                    } else {
+                        $arr[] = $data;
+                        $arr[] = $line;
                     }
-                    $this->_editArea = $arr;
+                }
+                $this->_editArea = $arr;
                 break;
             case self::INSERT_TYPE_AFTER :
-                    $arr = [];
-                    foreach ($this->_editArea as $idx => $line ) {
-                        if($idx != $this->_targetLineNumber){
-                            $arr[] = $line;
-                        } else {
-                            $arr[] = $line;
-                            $arr[] = $data;
-                        }
+                $arr = [];
+                foreach ($this->_editArea as $idx => $line ) {
+                    if($idx != $this->_targetLineNumber){
+                        $arr[] = $line;
+                    } else {
+                        $arr[] = $line;
+                        $arr[] = $data;
                     }
-                    $this->_editArea = $arr;
+                }
+                $this->_editArea = $arr;
                 break;
             case self::INSERT_TYPE_ARRAY :
                 $items = $this->getTargetLines();
-                echo ''.__FILE__.'->'.__method__.'() line:'.__line__.'   $items  = '.print_r($items, true);
+//                echo ''.__FILE__.'->'.__method__.'() line:'.__line__.'   $items  = '.print_r($items, true);
                 // delete "EOL" and ",",  then add ',EOL' for every line  -> then add the new line
                 foreach($items as $key => $val){
                     if(trim($val) == '') continue;
-                    $items[$key] = '        '.trim(trim($val), ',').','.PHP_EOL;
+                    if(self::endsWith(trim($val), ',')){
+                        $items[$key] = '        '.trim(trim($val), ',').','.PHP_EOL;        //
+                    } else {
+                        $items[$key] = '        '.trim(trim($val), ',').PHP_EOL;
+                    }
                 }
                 $items[] = '        '.$data;
                 $this->_editArea = array_merge([$this->_editArea[0]] , $items,  array_slice($this->_editArea, -1) );
