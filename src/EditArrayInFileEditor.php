@@ -302,6 +302,17 @@ class Editor {
     }
 
 
+    /*
+     * Append content directly to target file's end
+     *
+     * */
+    public function append($data)
+    {
+        $content = file_get_contents($this->_filleFullName);
+        $data = $content.PHP_EOL.$data;
+        $saveToFileRes = file_put_contents($this->_filleFullName, $data);
+        return $saveToFileRes;
+    }
 
 
 
