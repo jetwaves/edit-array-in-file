@@ -58,6 +58,11 @@ class Editor {
         return $this->_editArea;
     }
 
+    public function setEditArea($val)
+    {
+        $this->_editArea = $val;
+    }
+
     public function getTargetLines()
     {
         return array_slice($this->_editArea, 1, count($this->_editArea) - 2, true);
@@ -223,7 +228,7 @@ class Editor {
                 foreach($items as $key => $val){
                     if(trim($val) == '') continue;
                     if(self::endsWith(trim($val), ',')){
-                        $items[$key] = '        '.trim(trim($val), ',').','.PHP_EOL;        //
+                        $items[$key] = '        '.trim(trim($val), ',').','.PHP_EOL;
                     } else {
                         $items[$key] = '        '.trim(trim($val), ',').PHP_EOL;
                     }
