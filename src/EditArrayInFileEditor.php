@@ -343,5 +343,41 @@ class Editor {
         return false;
     }
 
+    /*
+     * Insert content (array of string or one string) into the selected file located by an anchor string and an offset value
+     *
+     * ATTENTION:  the EOL might be treated as a new line. So try avoid using offset value > 0
+     *
+     * */
+    public static function insertIntoFile($filename, $anchorString, $offset=0, $content)
+    {
+        if(!file_exists($filename)){
+            throw new \Exception('Target File '.$filename.' does not exists');
+        }
+        $fileLines = file($filename);
+        $resLines = [];
+        $foundAnchor = false;
+        foreach ($fileLines as $line) {
+            if(self::contains($line, $anchorString)){
+                $foundAnchor = true;
+                // decrease the offset value until 0 to locate the target line
+            } else {
+                if($foundAnchor){
+                    $offset = $offset - 1;
+                }
+            }
+            if($offset == 0 && $foundAnchor ){
+                if(is_array($content)){
+                    $resLines = array_merge($resLines, $content);
+                } else {
+                    $resLines[] = $content;
+                }
+            }
+            $resLines[] = $line;
+        }
+        $resLines = implode('',$resLines);
+        file_put_contents($filename, $resLines);
+    }
+
 
 }
